@@ -3,39 +3,30 @@ from datetime import datetime
 
 class JSONParser:
 
-    def __init__(self, filename:str):
-        self.filename = filename
-
     # TODO : cette fontion est pour parser le json de base : A supprimer des que le http est en place
-    def readFile1(self):
-        file = open(self.filename, "r")
-        jsonData = self.cleanJson1(json.loads(file.read()))
+    @staticmethod
+    def readFile1(filename):
+        file = open(filename, "r")
+        jsonData = json.loads(file.read())
+
+        # remise en iso de la date
+        for i in range(len(jsonData)):
+            jsonData[i]["date"]["$date"] = jsonData[i]["date"]["$date"].split('+')[0]
+        
+
         file.close()
         return jsonData
 
-    # TODO : cette fontion est pour parser le json de base : A supprimer des que le http est en place
-    def cleanJson1(self, jsonList):
-        new_jsonList = []
-        for json in jsonList:
-            json["date"] = datetime.fromisoformat(json["date"]["$date"].split('+')[0])
-            new_jsonList.append(json)
-        return new_jsonList
-
     #-- REAL METHODS --
 
-    def readFile(self):
-        file = open(self.filename, "r")
-        return self.cleanJson(json.loads(file.read()))
+    @staticmethod
+    def readFile(filename):
+        file = open(filename, "r")
+        return json.loads(file.read())
 
-    def cleanJson(self, jsonList):
-        new_jsonList = []
-        for json in jsonList:
-            json["date"] = datetime.fromisoformat(json["date"]["$date"].split('+')[0])
-            new_jsonList.append(json)
-        return new_jsonList
-
-    def saveJson(self, jsonList):
-        file = open(self.filename, "w")
+    @staticmethod
+    def saveJson(jsonList, filename):
+        file = open(filename, "w")
         file.write("[\n")
         if(len(jsonList) > 1):
             for i in range(len(jsonList)):

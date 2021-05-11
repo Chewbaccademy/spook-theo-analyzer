@@ -1,14 +1,14 @@
 from JSONParser import JSONParser
-from Dataset import Dataset
+from Data import Record, Dataset
 from datetime import datetime
 
 if __name__ == "__main__":
 
-    entryParser = JSONParser("./entry.json")
-    parser = JSONParser("./registeredData.json")
-    dataset = Dataset(entryParser.readFile(), parser)
+    jsonParser = JSONParser()
+    registeredDataset = Dataset.createFromJson(JSONParser.readFile1("./registeredData.json"))
+    newDataset = Dataset.createFromJson1(JSONParser.readFile1("./entry.json"))
 
-    print(dataset.getFromTo(datetime.fromisoformat("2017-04-27T06:00:00"), datetime.fromisoformat("2017-04-27T12:00:33")))
+    newDataset.saveDataset("./registeredData.json")
 
-    dataset.saveData()
+    print(registeredDataset)
     
