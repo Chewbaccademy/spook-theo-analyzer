@@ -1,6 +1,8 @@
 import math
 from datetime import datetime
 
+from GlobalDataset import GlobalDataset
+
 
 class Record:
 
@@ -51,31 +53,31 @@ class Record:
 
         return math.sqrt(count)
 
-    def get_normed_euclidean_distance(self, toCompare, extrema):
+    def get_normed_euclidean_distance(self, toCompare, global_dataset: GlobalDataset):
 
         sum = 0
 
         if self.brightness and toCompare.brightness:
-            if extrema["brightness"] != 0:
-                sum += (self.brightness - toCompare.brightness) ** 2 / extrema["brightness"]
+            if global_dataset.extrema_brightness[1] - global_dataset.extrema_brightness[0] != 0:
+                sum += (self.brightness - toCompare.brightness) ** 2 / (global_dataset.extrema_brightness[1] - global_dataset.extrema_brightness[0])**2
             else:
                 sum += (self.brightness - toCompare.brightness) ** 2
 
         if self.pressure and toCompare.pressure:
-            if extrema["pressure"] != 0:
-                sum += (self.pressure - toCompare.pressure) ** 2 / extrema["pressure"]
+            if global_dataset.extrema_pressure[1] - global_dataset.extrema_pressure[0] != 0:
+                sum += (self.pressure - toCompare.pressure) ** 2 / (global_dataset.extrema_pressure[1] - global_dataset.extrema_pressure[0])**2
             else:
                 sum += (self.pressure - toCompare.pressure) ** 2
 
         if self.hygrometry and toCompare.hygrometry:
-            if extrema["hygrometry"] != 0:
-                sum += (self.hygrometry - toCompare.hygrometry) ** 2 / extrema["hygrometry"]
+            if global_dataset.extrema_hygrometry[1] - global_dataset.extrema_hygrometry[0] != 0:
+                sum += (self.hygrometry - toCompare.hygrometry) ** 2 / (global_dataset.extrema_hygrometry[1] - global_dataset.extrema_hygrometry[0])**2
             else:
                 sum += (self.hygrometry - toCompare.hygrometry) ** 2
 
         if self.temperature and toCompare.temperature:
-            if extrema["temperature"] != 0:
-                sum += (self.temperature - toCompare.temperature) ** 2 / extrema["temperature"]
+            if global_dataset.extrema_temperature[1] - global_dataset.extrema_temperature[0] != 0:
+                sum += (self.temperature - toCompare.temperature) ** 2 / (global_dataset.extrema_temperature[1] - global_dataset.extrema_temperature[0])**2
             else:
                 sum += (self.temperature - toCompare.temperature) ** 2
 

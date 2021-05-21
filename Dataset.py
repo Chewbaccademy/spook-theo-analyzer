@@ -69,41 +69,77 @@ class Dataset:
 
         return extrema
 
+    def get_evolution_brightness(self):
+        first = self[0].brightness
+        last = self[len(self) - 1].brightness
 
-    def getNormedEuclideanDistance(self, toCompare):
+        if first is None or last is None:
+            return 0
+        return first - last
 
-        extrema = self.calculExtrema(toCompare)
+    def get_evolution_temperature(self):
+        first = self[0].temperature
+        last = self[len(self) - 1].temperature
+
+        if first is None or last is None:
+            return 0
+        return first - last
+
+    def get_evolution_pressure(self):
+        first = self[0].pressure
+        last = self[len(self) - 1].pressure
+        if first is None or last is None:
+            return 0
+        return first - last
+
+    def get_evolution_hygrometry(self):
+        first = self[0].hygrometry
+        last = self[len(self) - 1].hygrometry
+
+        if first is None or last is None:
+            return 0
+        return first - last
+
+    def getNormedEuclideanDistance(self, toCompare, global_dataset):
+
+        extrema = self.calculExtrema(toCompare) # TODO : externalise
 
         distance = 0
 
         for i in range(len(toCompare)):
             self_record = self[i]
             compared_record = toCompare[i]
-            distance += self_record.get_normed_euclidean_distance(compared_record, extrema)
+            distance += self_record.get_normed_euclidean_distance(compared_record, global_dataset)
+
+        distance += ((self.get_evolution_brightness() - toCompare.get_evolution_brightness())**2)/((global_dataset.extrema_evol_brightness[1] - global_dataset.extrema_evol_brightness[0])**2)
+        distance += ((self.get_evolution_hygrometry() - toCompare.get_evolution_hygrometry())**2)/((global_dataset.extrema_evol_hygrometry[1] - global_dataset.extrema_evol_hygrometry[0])**2)
+        distance += ((self.get_evolution_pressure() - toCompare.get_evolution_pressure())**2)/((global_dataset.extrema_evol_pressure[1] - global_dataset.extrema_evol_pressure[0])**2)
+        distance += ((self.get_evolution_temperature() - toCompare.get_evolution_temperature())**2)/((global_dataset.extrema_evol_temperature[1] - global_dataset.extrema_evol_temperature[0])**2)
 
         return distance
 
-    def getNearestDataset(self, datas):
+    def getNearestDataset(self, references, k: int, global_dataset):
         """
 
-        :param datas: [Dataset]
-        :return:
+        :param global_dataset:
+        :param k:
+        :param references: Global dataset
+        :return: list(tuple (float, int))
         """
 
-        nbIteration = len(datas) + 1 - len(self) - 6
+        dists = [(-1, -1) for _ in range(k)]
 
-        maxDist = -1
-        nearestNeighbour = None
+        max_iter = len(references) + 1 - len(self) - 6
 
-        datas.sortByUserAndDate()
+        for i in range(max_iter):
+            reference = Dataset(references[i: i + len(self)])
 
+            test_dist = self.getNormedEuclideanDistance(reference, global_dataset)
 
-        for i in range(nbIteration):
-            testNeighbour = datas[i: i + len(self)]
+            for j in range(k):
+                if dists[j][0] == -1 or dists[j][0] > test_dist:
+                    dists[j] = (test_dist, i)
+                    dists.sort(key=lambda s: s[0])
+                    break
 
-            testDist = self.getNormedEuclideanDistance(Dataset(testNeighbour))
-            if maxDist == -1 or maxDist > testDist:
-                maxDist = testDist
-                nearestNeighbour = (testDist, i)
-
-        return nearestNeighbour
+        return dists
