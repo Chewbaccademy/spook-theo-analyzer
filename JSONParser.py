@@ -1,40 +1,50 @@
 import json
 from datetime import datetime
 
-class JSONParser:
+# TODO : cette fontion est pour parser le json de base : A supprimer des que le http est en place
+from Record import Record
 
-    # TODO : cette fontion est pour parser le json de base : A supprimer des que le http est en place
-    @staticmethod
-    def readFile1(filename):
-        file = open(filename, "r")
-        jsonData = json.loads(file.read())
 
-        # remise en iso de la date
-        for i in range(len(jsonData)):
-            jsonData[i]["date"]["$date"] = jsonData[i]["date"]["$date"].split('+')[0]
-        
+def read_file_icampus(filename):
+    records = []
 
-        file.close()
-        return jsonData
+    with open(filename, 'r') as file:
+        for line in file:
+            data = json.loads(line)
 
-    #-- REAL METHODS --
+            date = datetime.fromisoformat(data['date']['$date'].split('+')[0])
+            pressure = data['pressure'] if 'pressure' in data else None
+            light = data['light'] if 'light' in data else None
+            humidity = data['humidity'] if 'humidity' in data else None
+            temperature = data['temperature'] if 'temperature' in data else None
+            rain = data['rain'] if 'rain' in data else None
+            record = Record(
+                date,
+                pressure,
+                light,
+                humidity,
+                temperature,
+                rain)
 
-    @staticmethod
-    def readFile(filename):
-        file = open(filename, "r")
-        return json.loads(file.read())
+            records.append(record)
 
-    @staticmethod
-    def saveJson(jsonList, filename):
-        file = open(filename, "w")
-        file.write("[\n")
-        if(len(jsonList) > 1):
-            for i in range(len(jsonList)):
-                jsonData = jsonList[i]
-                file.write(json.dumps(jsonData) + ",\n")
-        file.write(json.dumps(jsonList[len(jsonList) - 1]) + "\n")
-        file.write("]\n")
-        file.close()
+    return records
 
-        
 
+# -- REAL METHODS --
+
+def readFile(filename):
+    with open(filename, 'r') as f:
+        return json.loads(f.read())
+
+
+def saveJson(jsonList, filename):
+    file = open(filename, "w")
+    file.write("[\n")
+    if (len(jsonList) > 1):
+        for i in range(len(jsonList)):
+            jsonData = jsonList[i]
+            file.write(json.dumps(jsonData) + ",\n")
+    file.write(json.dumps(jsonList[len(jsonList) - 1]) + "\n")
+    file.write("]\n")
+    file.close()
